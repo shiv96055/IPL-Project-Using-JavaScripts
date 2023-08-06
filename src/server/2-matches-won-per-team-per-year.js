@@ -1,54 +1,36 @@
-
-
-
-
 const fs = require("fs");
 const dataArray = require("./index.js");
 
-function storeMatchId() {
-  const storeId = [];
+function countMatchWonPerTeam() {
+  const countMatchWonPerTeamPerYear = {};
   dataArray.matches.forEach((match) => {
     const season = match.season;
-    if (season === "2016") {
-      storeId.push(match.id);
-    }
-  });
+    const winnerTeam = match.winner;
 
-  return storeId;
-}
-
-const storeId = storeMatchId();
-
-function countExtraRunPerTeamIn2016() {
-  const countExtraRun = {};
-  dataArray.deliveries.forEach((delivery) => {
-    const matchId = delivery.match_id;
-    if (storeId.indexOf(matchId) !== -1) {
-      const run = Number(delivery.extra_runs);
-      const team = delivery.bowling_team;
-
-      if (countExtraRun[team]) {
-        countExtraRun[team] = countExtraRun[team] + run;
+    if (countMatchWonPerTeamPerYear[season]) {
+      if (countMatchWonPerTeamPerYear[season][winnerTeam]) {
+        countMatchWonPerTeamPerYear[season][winnerTeam]++;
       } else {
-        countExtraRun[team] = run;
+        countMatchWonPerTeamPerYear[season][winnerTeam] = 1;
       }
+    } else {
+      countMatchWonPerTeamPerYear[season] = { [winnerTeam]: 1 };
     }
   });
 
-  return countExtraRun;
+  return countMatchWonPerTeamPerYear;
 }
 
-const countExtraRun = countExtraRunPerTeamIn2016();
-const jsonContent = JSON.stringify(countExtraRun, null, 2);
+const countMatchWonPerTeamPerYear = countMatchWonPerTeam();
+const jsonContent = JSON.stringify(countMatchWonPerTeamPerYear, null, 2);
 
-const filePath =
-  "src/public/output/3-extra-run-conceded-per-team-per-year.json";
+const filePath = "src/public/output/2-matches-won-per-team-per-year.json";
 fs.writeFile(filePath, jsonContent, "utf8", (err) => {
   if (err) {
     console.error("Error writing to file:", err);
   } else {
     console.log(
-      "countExtraRunPerTeamIn2016 object has been written to ",
+      "countMatchWonPerTeamPerYear object has been written to ",
       filePath
     );
   }
